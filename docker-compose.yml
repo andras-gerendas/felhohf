@@ -15,5 +15,12 @@ services:
   backend:
     image: ghcr.io/andras-gerendas/felhohf_backend:latest
     container_name: backend
+    depends_on:
+      - db_handler
+    networks:
+      - sync_network
+  db_handler:
+    image: ghcr.io/andras-gerendas/felhohf_db:latest
+    container_name: db_handler
     networks:
       - sync_network
