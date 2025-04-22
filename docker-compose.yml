@@ -1,0 +1,19 @@
+networks:
+  sync_network:
+    driver: bridge
+
+services:
+  frontend:
+    image: ghcr.io/andras-gerendas/felhohf_frontend:latest
+    container_name: frontend
+    depends_on:
+      - backend
+    ports:
+      - 5000:5000
+    networks:
+      - sync_network
+  backend:
+    image: ghcr.io/andras-gerendas/felhohf_backend:latest
+    container_name: backend
+    networks:
+      - sync_network
