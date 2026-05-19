@@ -3,7 +3,7 @@ import json
 import logging
 import sqlite3
 
-DATABASE = '/app/notifications.db'
+DATABASE = '/app/data/notifications.db'
 
 app = Flask(__name__)
 

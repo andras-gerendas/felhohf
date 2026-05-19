@@ -5,28 +5,34 @@ networks:
 services:
   frontend:
     image: frontend-test
-    container_name: frontend
     depends_on:
       - backend
+      - kafka
     ports:
       - 5000:5000
     networks:
       - sync_network
   backend:
     image: backend-test
-    container_name: backend
+    deploy:
+      mode: replicated
+      replicas: 6
     depends_on:
       - db_handler
+      - kafka
     networks:
       - sync_network
   db_handler:
     image: database-test
     container_name: db_handler
+    depends_on:
+      - kafka
     networks:
       - sync_network
+    volumes:
+      - db-data:/app/data
   admin:
     image: admin-test
-    container_name: admin
     depends_on:
       - db_handler
     ports:
@@ -43,8 +49,14 @@ services:
       - 5500:5000
     networks:
       - sync_network
+    volumes:
+      - sub-data:/app/data
   kafka:
     image: kafka-test
     container_name: kafka
     networks:
       - sync_network
+
+volumes:
+  db-data:
+  sub-data:

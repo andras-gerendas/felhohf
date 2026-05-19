@@ -10,4 +10,4 @@ WORKDIR /app
 
 COPY app.py app.py
 
-CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
+CMD [ "python3", "/app/app.py"]

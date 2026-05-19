@@ -4,7 +4,7 @@ from flask import Flask, g, request
 from kafka import KafkaProducer
 import json
 
-DATABASE = '/app/images.db'
+DATABASE = '/app/data/images.db'
 
 app = Flask(__name__)
 
@@ -71,6 +71,31 @@ def image(image_id):
         app.logger.info(resp)
         return app.response_class(response=json.dumps(resp), status=402, mimetype='application/json')
 
+@app.route("/image/raw/<int:image_id>")
+def raw_image(image_id):
+    try:
+        cur = get_db().cursor()
+        cur.execute("SELECT * FROM images where id = ?", (int(image_id),))
+
+        rows = cur.fetchall()
+
+        if len(rows) == 0:
+            resp = {"status": f'content with this id does not exist'}
+            app.logger.info(resp)
+            return app.response_class(response=json.dumps(resp), status=401, mimetype='application/json')
+        
+        row = rows[0]
+
+        if row["processed"] == 0:
+            result = {"id": row['id'], "processed": 0, "image": row["image_normal"]}
+        else:
+            result = {"id": row['id'], "processed": 1}
+        
+        return app.response_class(response=json.dumps(result), status=200, mimetype='application/json')
+    except Exception as e:
+        resp = {"status": f'database error has occurred: {str(e)}'}
+        app.logger.info(resp)
+        return app.response_class(response=json.dumps(resp), status=402, mimetype='application/json')
 
 def create_new(content):
     if 'image' not in content or 'caption' not in content:

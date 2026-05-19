@@ -1,6 +1,7 @@
 import base64
 from flask import Blueprint, Flask, render_template, url_for, request, flash, redirect
 import json
+from kafka import KafkaProducer
 import requests
 import os
 
@@ -38,8 +39,13 @@ def index():
                 with open(cache_path, 'wb') as image_file:
                     image_file.write(image)
 
-        images.append({'src': f'{image_raw["id"]}.png',
-                       'caption': image_raw['caption_user']})
+        if image_raw['processed'] == 1:
+            images.append({'src': f'{image_raw["id"]}.png',
+                           'caption': image_raw['caption_user']})
+        else:
+            images.append({'src': f'empty',
+                           'caption': image_raw['caption_user'],
+                           'id': image_raw['id']})
 
     return render_template(
         "image/gallery.html",
@@ -82,13 +88,20 @@ def handle_upload():
 
     content = json.loads(r.content)
 
-    json_obj = {"image": image_string.decode('utf-8'), "caption": caption, "id": content['id']}
-    r = requests.post('http://backend:5000', json=json_obj)
-
-    if r.status_code != 200:
-        flash(f"Error occurred in backend: {r.status_code}", "error")
-        return redirect(redirect_url)
+    producer = KafkaProducer(bootstrap_servers='kafka:9092', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+    resp = {"id": content['id']}
+    producer.send('image-uploaded', resp)
     
     flash(f"File uploaded successfully!", "success")
     
+    return redirect(redirect_url)
+
+@bp.route('/refresh/<int:image_id>')
+def refresh(image_id):
+    redirect_url = url_for('index')
+
+    producer = KafkaProducer(bootstrap_servers='kafka:9092', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+    resp = {"id": image_id}
+    producer.send('image-uploaded', resp)
+
     return redirect(redirect_url)

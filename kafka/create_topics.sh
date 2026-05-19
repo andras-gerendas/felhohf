@@ -27,5 +27,7 @@ if $start_timeout_exceeded; then
 fi
 
 sh /opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic ocr-completed --partitions 1 --replication-factor 1 --if-not-exists
+sh /opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic image-uploaded --partitions 6 --replication-factor 1 --if-not-exists
+sh /opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --topic image-uploaded --alter --partitions 6
 
 wait
