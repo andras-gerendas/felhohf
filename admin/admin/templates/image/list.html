@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+{% if is_subscribed %}
+<script>
+const socket = io("http://localhost:5500");
+
+socket.emit("register", {{subscription_id}}, (result) => {
+    const json = JSON.parse(result)
+
+    if (json.status == 'ok') {
+        new Notify({
+            status: 'success',
+            title: 'Connected',
+            text: 'Notifications are coming'
+        })
+    } else {
+        new Notify({
+            status: 'error',
+            title: 'Could not connect',
+            text: 'Refresh to retry'
+        })
+    }
+});
+
+socket.on("notification", (notification) => {
+    addNotification(notification);
+});
+
+function addNotification(notification) {
+    const json = JSON.parse(notification)
+
+    const table = document.querySelector(".admin table");
+
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+        <td>${json.caption_user}</td>
+        <td>${json.caption_gen}</td>
+    `;
+
+    table.append(row);
+
+    new Notify({
+        status: 'success',
+        title: 'New image processed!',
+        text: 'See at the bottom of the page.'
+    })
+}
+</script>
+{% endif %}
+
+<div class="admin">
+    {% if not is_subscribed %}
+    <form method="GET" action="/subscribe">
+        <button type="submit">Subscribe</button>
+    </form>
+    {% else %}
+    <table>
+        <tr>
+            <th>Caption</th>
+            <th>Generated</th>
+        </tr>
+
+        {% for image in images %}
+
+        <tr>
+            <td>{{image.caption_user}}</td>
+            <td>{{image.caption_gen}}</td>
+        </tr>
+
+        {% endfor %}
+    </table>
+    {% endif %}
+</div>
+
+{% endblock %}

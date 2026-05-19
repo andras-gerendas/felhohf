@@ -4,7 +4,7 @@ networks:
 
 services:
   frontend:
-    image: ghcr.io/andras-gerendas/felhohf_frontend:latest
+    image: frontend-test
     container_name: frontend
     depends_on:
       - backend
@@ -13,19 +13,19 @@ services:
     networks:
       - sync_network
   backend:
-    image: ghcr.io/andras-gerendas/felhohf_backend:latest
+    image: backend-test
     container_name: backend
     depends_on:
       - db_handler
     networks:
       - sync_network
   db_handler:
-    image: ghcr.io/andras-gerendas/felhohf_db:latest
+    image: database-test
     container_name: db_handler
     networks:
       - sync_network
   admin:
-    image: ghcr.io/andras-gerendas/felhohf_admin:latest
+    image: admin-test
     container_name: admin
     depends_on:
       - db_handler
@@ -34,7 +34,7 @@ services:
     networks:
       - sync_network
   notifier:
-    image: ghcr.io/andras-gerendas/felhohf_notifier:latest
+    image: notifier-test
     container_name: notifier
     depends_on:
       - db_handler
@@ -44,7 +44,7 @@ services:
     networks:
       - sync_network
   kafka:
-    image: ghcr.io/andras-gerendas/felhohf_kafka:latest
+    image: kafka-test
     container_name: kafka
     networks:
       - sync_network

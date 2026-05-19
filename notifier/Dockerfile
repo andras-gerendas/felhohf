@@ -7,7 +7,7 @@ FROM build
 
 WORKDIR /app
 
-COPY app.py app.py
+COPY notifier notifier
 COPY schema.sql schema.sql
 
-CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
+CMD [ "python3", "-m" , "flask", "--app", "notifier", "run", "--host=0.0.0.0"]
